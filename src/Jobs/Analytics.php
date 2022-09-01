@@ -56,7 +56,7 @@ class Analytics implements ShouldQueue
     /**
      * @var string
      */
-    private $tracking_id = 'UA-80887494-1';
+    private $tracking_id = false;
 
     /**
      * @var bool
@@ -88,26 +88,7 @@ class Analytics implements ShouldQueue
      */
     public function handle()
     {
-
-        // Do nothing if tracking is disabled
-        if (! $this->allowTracking())
-            return;
-
-        // Send the hit based on the hit type
-        switch ($this->hit->type) {
-
-            case 'event':
-                $this->sendEvent();
-                break;
-
-            case 'exception':
-                $this->sendException();
-                break;
-
-            default:
-                break;
-        }
-
+		return;
     }
 
     /**
@@ -119,11 +100,7 @@ class Analytics implements ShouldQueue
      */
     public function allowTracking()
     {
-
-        if (Seat::get('allow_tracking') === 'no')
-            return false;
-
-        return true;
+		return false;
     }
 
     /**
@@ -131,14 +108,7 @@ class Analytics implements ShouldQueue
      */
     public function sendEvent()
     {
-
-        $this->send('event', [
-            'ec' => $this->hit->ec,     // Event Category
-            'ea' => $this->hit->ea,     // Event Action
-            'el' => $this->hit->el,     // Event Label
-            'ev' => $this->hit->ev,     // Event Value
-        ]);
-
+		return;
     }
 
     /**
@@ -151,54 +121,7 @@ class Analytics implements ShouldQueue
      */
     private function send($type, array $query)
     {
-        $versions = $this->getPluginsMetadataList()->core->map(function (AbstractSeatPlugin $package) {
-            return sprintf('%s/%s', $package->getPackagistPackageName(), $package->getVersion());
-        });
-
-        $client = new Client([
-            'base_uri' => 'https://www.google-analytics.com/',
-            'timeout'  => 5.0,
-        ]);
-
-        // Check if we are in debug mode
-        $uri = $this->debug ? '/debug/collect' : '/collect';
-
-        // Submit the hit
-        $client->get($uri, [
-            'query' => array_merge([
-
-                // Fields referenced from:
-                //  https://developers.google.com/analytics/devguides/collection/protocol/v1/parameters
-
-                // Required Fields
-                //  https://developers.google.com/analytics/devguides/collection/protocol/v1/devguide#required
-                'v'   => 1,                     // Protocol Version
-                'tid' => $this->tracking_id,    // Google Tracking-ID
-                'cid' => $this->getClientID(),  // Unique Client-ID
-                't'   => $type,                 // Event
-
-                // Optional Fields
-                'aip' => 1,                     // Anonymize the IP of the calling client
-                'an'  => 'SeAT',                // App Name
-
-                // Versions of the currently installed packages.
-                'av'  => $versions->implode(', '),
-
-                // User Agent is comprised of OS Name(s), Release(r)
-                // and Machine Type(m). Examples:
-                //  Darwin/15.6.0/x86_64
-                //  Linux/2.6.32-642.el6.x86_64/x86_64
-                //
-                // See:
-                //  http://php.net/manual/en/function.php-uname.php
-                'ua'  => 'SeAT/' . php_uname('s') .
-                    '/' . php_uname('r') .
-                    '/' . php_uname('m'),
-
-                'z' => rand(1, 10000),          // Cache Busting Random Value
-            ], $query),
-        ]);
-
+		return;
     }
 
     /**
@@ -211,26 +134,7 @@ class Analytics implements ShouldQueue
      */
     private function getClientID()
     {
-
-        $id = Seat::get('analytics_id');
-
-        if (! $id) {
-
-            // Generate a V4 random UUID
-            //  https://gist.github.com/dahnielson/508447#file-uuid-php-L74
-            $id = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-                mt_rand(0, 0xFFFF), mt_rand(0, 0xFFFF),
-                mt_rand(0, 0xFFFF),
-                mt_rand(0, 0x0FFF) | 0x4000,
-                mt_rand(0, 0x3FFF) | 0x8000,
-                mt_rand(0, 0xFFFF), mt_rand(0, 0xFFFF), mt_rand(0, 0xFFFF)
-            );
-
-            // Set the generated UUID in the applications config
-            Seat::set('analytics_id', $id);
-        }
-
-        return $id;
+        return 'fartbutts';
 
     }
 
@@ -239,10 +143,6 @@ class Analytics implements ShouldQueue
      */
     public function sendException()
     {
-
-        $this->send('exception', [
-            'exd' => $this->hit->exd,   // Exception Description
-            'exf' => $this->hit->exf,   // Is Fatal Exception?
-        ]);
+		return;
     }
 }
